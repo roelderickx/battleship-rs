@@ -76,10 +76,10 @@ impl Battleship {
             
             let first_char = direction.chars().nth(0).unwrap();
             
-            if first_char == 'H' {
+            if first_char == 'H' || first_char == 'h' {
                 return Direction::Horizontal;
             }
-            else if first_char == 'V' {
+            else if first_char == 'V' || first_char == 'v' {
                 return Direction::Vertical;
             }
         }
