@@ -8,13 +8,15 @@ use rand::Rng;
 // FIXME Use traits?
 
 pub struct Player {
+    name: String,
     player_field: Battlefield,
     opponent_field: Battlefield
 }
 
 impl Player {
-    fn create() -> Self {
+    fn create(name: &str) -> Self {
         Self {
+            name: name.to_string(),
             player_field: Battlefield::create_player(),
             opponent_field: Battlefield::create_opponent()
         }
@@ -34,8 +36,8 @@ impl Player {
 
     fn print(&self) {
         println!("*** BATTLESHIP ***\n");
-        let spaces = " ".repeat(28);
-        println!("Player{}| Opponent", spaces);
+        let spaces = " ".repeat(34-self.name.chars().count());
+        println!("{}{}| Opponent", self.name, spaces);
 
         for y in 0..11 {
             self.player_field.print_line(y);
@@ -53,9 +55,9 @@ pub struct HumanPlayer {
 }
 
 impl HumanPlayer {
-    pub fn create() -> Self {
+    pub fn create(name: &str) -> Self {
         Self {
-            base_player: Player::create()
+            base_player: Player::create(name)
         }
     }
     
@@ -178,9 +180,9 @@ pub struct ComputerPlayer {
 }
 
 impl ComputerPlayer {
-    pub fn create() -> Self {
+    pub fn create(name: &str) -> Self {
         Self {
-            base_player: Player::create(),
+            base_player: Player::create(name),
             first_shot_x: 255,
             first_shot_y: 255,
             current_ship_attacked: Ship::None,
@@ -282,10 +284,16 @@ impl ComputerPlayer {
             // and a multiple of 2 away from the first shot in both directions
             // and not next to an already found ship
             let mut valid_targets: Vec<(u8, u8)> = Vec::new();
-            for y in 0..5 {
-                for x in 0..5 {
-                    let coord_x = x * 2 + self.first_shot_x % 2;
-                    let coord_y = y * 2 + self.first_shot_y % 2;
+            for y_loop in 0..10 {
+                for x_loop in 0..5 {
+                    let mut coord_x = x_loop * 2;
+                    if self.first_shot_x % 2 == 0 {
+                        coord_x += y_loop % 2;
+                    }
+                    else {
+                        coord_x += self.first_shot_x % 2 - y_loop % 2;
+                    }
+                    let coord_y = y_loop;
                     // if not targeted and not next to a ship
                     if !self.base_player.opponent_field.is_targeted(coord_x, coord_y) &&
                        self.base_player.opponent_field.can_position_ship(1, coord_x, coord_y,
@@ -313,8 +321,8 @@ impl ComputerPlayer {
                     break;
                 }
                 x -= 1;
-                if self.first_ship_x >= self.current_ship_attacked.get_length() + 1 &&
-                   x == self.first_ship_x - self.current_ship_attacked.get_length() + 1
+                if self.first_ship_x >= self.current_ship_attacked.get_length() &&
+                   x == self.first_ship_x - self.current_ship_attacked.get_length()
                 {
                     x = 255;
                     break;
@@ -355,8 +363,8 @@ impl ComputerPlayer {
                     break;
                 }
                 y -= 1;
-                if self.first_ship_y >= self.current_ship_attacked.get_length() + 1 &&
-                   y == self.first_ship_y - self.current_ship_attacked.get_length() + 1
+                if self.first_ship_y >= self.current_ship_attacked.get_length() &&
+                   y == self.first_ship_y - self.current_ship_attacked.get_length()
                 {
                     y = 255;
                     break;
@@ -372,7 +380,7 @@ impl ComputerPlayer {
                 loop {
                     y += 1;
                     if y == 10 ||
-                       y == self.first_ship_x + self.current_ship_attacked.get_length()
+                       y == self.first_ship_y + self.current_ship_attacked.get_length()
                     {
                         y = 255;
                         break;
@@ -408,7 +416,7 @@ impl ComputerPlayer {
         }
 
         self.base_player.opponent_field.save_position_information(x, y, ship, true);
-        println!("Opponent shot at {},{}", x+1, y+1);
+        println!("{} shot at {},{}", self.base_player.name, x+1, y+1);
 
         return self.base_player.all_opponent_ships_destroyed();
     }

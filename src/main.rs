@@ -8,8 +8,8 @@ use player::HumanPlayer;
 use player::ComputerPlayer;
 
 fn main() {
-    let mut h = HumanPlayer::create();
-    let mut c = ComputerPlayer::create();
+    let mut h = HumanPlayer::create("Player");
+    let mut c = ComputerPlayer::create("Computer");
     h.print();
     
     h.position_ships();
