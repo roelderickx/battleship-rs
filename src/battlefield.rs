@@ -1,25 +1,29 @@
 use crate::direction::Direction;
 use crate::ship::Ship;
-use crate::battle_grid_cell::BattleGridCell;
+use crate::battlefield_position::BattlefieldPosition;
 
-pub struct BattleGrid {
-    grid: [[BattleGridCell; 10]; 10],
-    is_player: bool
+pub struct Battlefield {
+    grid: [[BattlefieldPosition; 10]; 10]
 }
 
-impl BattleGrid {
-    pub fn create(is_player: bool) -> Self {
+impl Battlefield {
+    pub fn create_player() -> Self {
         Self {
-            grid: [[BattleGridCell::Ocean(false); 10]; 10],
-            is_player
+            grid: [[BattlefieldPosition::create_player(); 10]; 10]
+        }
+    }
+    
+    pub fn create_opponent() -> Self {
+        Self {
+            grid: [[BattlefieldPosition::create_opponent(); 10]; 10]
         }
     }
     
     /// Calculates if a given ship can be placed on x,y in the given direction
     /// The ship should not touch any other ship and should be completely inside the grid
-    /// x and y must be in the range 0..9
+    /// x and y must be in the range 0..=9
     fn can_position_ship(&self, ship: Ship, x: u8, y: u8, direction: Direction) -> bool {
-        // ship must be inside battlegrid
+        // ship must be inside battlefield
         if (direction.is_horizontal() && x + ship.get_length() - 1 > 9) ||
            (direction.is_vertical() && y + ship.get_length() - 1 > 9) {
             return false;
@@ -62,7 +66,7 @@ impl BattleGrid {
     }
     
     /// Positions given ship at x,y in the given direction
-    /// Returns true if succeeded
+    /// Returns true if succeeded, false if the ship cannot be positioned as desired
     pub fn position_ship(&mut self, ship: Ship, x: u8, y: u8, direction: Direction) -> bool {
         if self.can_position_ship(ship, x, y, direction) {
             // Calculate ship zone
@@ -76,44 +80,42 @@ impl BattleGrid {
             }
             for y_pos in y..y2 {
                 for x_pos in x..x2 {
-                    self.grid[x_pos as usize][y_pos as usize] =
-                            BattleGridCell::Battleship(false, ship);
+                    self.save_position_information(x_pos, y_pos, ship, false);
                 }
             }
             
             true
         }
         else {
-            if self.is_player {
-                println!("Illegal ship position.");
-                println!("Ships may not touch each other and must be placed inside the grid");
-            }
-            
             false
         }
     }
     
-    /// Shoot at given coordinate
-    pub fn shoot(&mut self, x: u8, y: u8) {
-        match self.grid[x as usize][y as usize] {
-            BattleGridCell::Ocean(_is_targeted) => {
-                self.grid[x as usize][y as usize] = BattleGridCell::Ocean(true);
-            },
-            BattleGridCell::Battleship(_is_targeted, ship) => {
-                self.grid[x as usize][y as usize] = BattleGridCell::Battleship(true, ship);
-            }
-        }
+    pub fn reveal_position_information(&mut self, x: u8, y: u8) -> Ship {
+        self.grid[x as usize][y as usize].set_targeted();
+        self.grid[x as usize][y as usize].get_ship()
+    }
+    
+    pub fn save_position_information(&mut self, x: u8, y: u8, ship: Ship, is_targeted: bool) {
+        self.grid[x as usize][y as usize].save_position_information(ship, is_targeted);
     }
     
     pub fn all_ships_destroyed(&self) -> bool {
+        let mut all_ships_length = 0;
+        
+        for ship in Ship::get_ship_list().into_iter() {
+            all_ships_length += ship.get_length();
+        }
+
         for y in 0..10 {
             for x in 0..10 {
-                if self.grid[x][y].is_ship() && !self.grid[x][y].is_targeted() {
-                    return false;
+                if self.grid[x][y].is_ship() {
+                    all_ships_length -= 1;
                 }
             }
         }
-        true
+
+        all_ships_length == 0
     }
 
     pub fn print_line(&self, line_number: u8) {
@@ -123,7 +125,7 @@ impl BattleGrid {
         else {
             print!("{:2} ", line_number);
             for x in 0..10 {
-                print!("{}", self.grid[x][(line_number as usize)-1].get_symbol(self.is_player));
+                self.grid[x][(line_number as usize)-1].print_position();
             }
         }
     }

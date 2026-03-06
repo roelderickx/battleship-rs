@@ -1,17 +1,36 @@
 mod direction;
 mod ship;
-mod battle_grid_cell;
-mod battle_grid;
-mod battleship;
+mod battlefield_position;
+mod battlefield;
+mod player;
 
-use battleship::Battleship;
+use player::HumanPlayer;
+use player::ComputerPlayer;
 
 fn main() {
-    let mut b = Battleship::create();
-    b.print();
+    let mut h = HumanPlayer::create();
+    let mut c = ComputerPlayer::create();
+    h.print();
     
-    b.position_ships();
+    h.position_ships();
+    c.position_ships();
     
-    b.play();
+    loop {
+        // player
+        if h.attack(c.get_player()) {
+            h.print();
+            println!("Player wins!");
+            break;
+        }
+        
+        // opponent
+        if c.attack(h.get_player()) {
+            c.print();
+            println!("Computer wins!");
+            break;
+        }
+        
+        h.print();
+    }
 }
 

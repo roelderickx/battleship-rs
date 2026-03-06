@@ -9,6 +9,16 @@ pub enum Ship {
 }
 
 impl Ship {
+    pub fn get_ship_list() -> [Ship;5] {
+        [
+            Ship::AircraftCarrier,
+            Ship::Battleship,
+            Ship::Cruiser,
+            Ship::Submarine,
+            Ship::Destroyer
+        ]
+    }
+
     pub fn get_length(&self) -> u8 {
         match self {
             Ship::None => 0,
