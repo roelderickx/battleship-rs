@@ -21,15 +21,15 @@ impl Player {
             opponent_field: Battlefield::create_opponent()
         }
     }
-    
+
     fn position_ship(&mut self, ship: Ship, x: u8, y: u8, direction: Direction) -> bool {
         self.player_field.position_ship(ship, x, y, direction)
     }
-    
+
     fn attack_coordinate(&mut self, x: u8, y: u8) -> Ship {
         self.player_field.reveal_position_information(x, y)
     }
-    
+
     fn all_opponent_ships_destroyed(&self) -> bool {
         return self.opponent_field.all_ships_destroyed();
     }
@@ -84,7 +84,7 @@ impl HumanPlayer {
                 .expect("Failed to read line");
 
             let mut coordinates = coordinate.trim().split(',');
-            
+
             let x: u8 = match coordinates.next() {
                 Some(val) => {
                     match val.trim().parse() {
@@ -94,7 +94,7 @@ impl HumanPlayer {
                 },
                 None => continue,
             };
-            
+
             let y: u8 = match coordinates.next() {
                 Some(val) => {
                     match val.trim().parse() {
@@ -104,13 +104,13 @@ impl HumanPlayer {
                 },
                 None => continue,
             };
-            
+
             if x >= 1 && y <= 10 && x >= 1 && y <= 10 {
                 return (x-1, y-1)
             }
         }
     }
-    
+
     fn ask_direction(&self) -> Direction {
         loop {
             println!("Enter direction: (H)orizontally or (V)ertically");
@@ -120,9 +120,9 @@ impl HumanPlayer {
             io::stdin()
                 .read_line(&mut direction)
                 .expect("Failed to read line");
-            
+
             let first_char = direction.chars().nth(0).unwrap();
-            
+
             if first_char == 'H' || first_char == 'h' {
                 return Direction::Horizontal;
             }
@@ -131,7 +131,7 @@ impl HumanPlayer {
             }
         }
     }
-    
+
     pub fn position_ships(&mut self) {
         for ship in Ship::get_ship_list().into_iter() {
             // player position
@@ -150,7 +150,7 @@ impl HumanPlayer {
             self.print();
         }
     }
-    
+
     /// Asks coordinates to attack the given opponent
     /// Returns true if all opponent's ships are destroyed
     pub fn attack(&mut self, opponent: &mut Player) -> bool {
@@ -191,7 +191,7 @@ impl ComputerPlayer {
             first_ship_y: 255
         }
     }
-    
+
     pub fn get_player(&mut self) -> &mut Player {
         return &mut self.base_player;
     }
@@ -216,7 +216,7 @@ impl ComputerPlayer {
             }
         }
     }
-    
+
     fn is_valid_attack_direction(&self, direction: Direction) -> bool {
         let mut start_coord = self.first_ship_x;
         if direction.is_vertical() {
@@ -260,10 +260,10 @@ impl ComputerPlayer {
                 return true;
             }
         }
-        
+
         false
     }
-    
+
     /// Calculates coordinates to attack the given opponent
     /// Returns true if all opponent's ships are destroyed
     pub fn attack(&mut self, opponent: &mut Player) -> bool {
@@ -303,7 +303,7 @@ impl ComputerPlayer {
                     }
                 }
             }
-            
+
             let index = rand::rng().random_range(0..valid_targets.len());
             let coord = valid_targets.get(index);
             match coord {
@@ -330,8 +330,14 @@ impl ComputerPlayer {
                 if !self.base_player.opponent_field.is_targeted(x, self.first_ship_y) {
                     break;
                 }
+                else if self.base_player.opponent_field.get_ship(x, self.first_ship_y)
+                                == Ship::None
+                {
+                    x = 255;
+                    break;
+                }
             }
-            
+
             // Try right
             if x == 255 {
                 x = self.first_ship_x;
@@ -344,6 +350,12 @@ impl ComputerPlayer {
                         break;
                     }
                     if !self.base_player.opponent_field.is_targeted(x, self.first_ship_y) {
+                        break;
+                    }
+                    else if self.base_player.opponent_field.get_ship(x, self.first_ship_y)
+                                    == Ship::None
+                    {
+                        x = 255;
                         break;
                     }
                 }
@@ -372,8 +384,14 @@ impl ComputerPlayer {
                 if !self.base_player.opponent_field.is_targeted(self.first_ship_x, y) {
                     break;
                 }
+                else if self.base_player.opponent_field.get_ship(self.first_ship_x, y)
+                                == Ship::None
+                {
+                    y = 255;
+                    break;
+                }
             }
-            
+
             // Try down
             if y == 255 {
                 y = self.first_ship_y;
@@ -388,6 +406,12 @@ impl ComputerPlayer {
                     if !self.base_player.opponent_field.is_targeted(self.first_ship_x, y) {
                         break;
                     }
+                    else if self.base_player.opponent_field.get_ship(self.first_ship_x, y)
+                                    == Ship::None
+                    {
+                        y = 255;
+                        break;
+                    }
                 }
             }
             if y == 255 {
@@ -397,7 +421,7 @@ impl ComputerPlayer {
         }
 
         let ship = opponent.attack_coordinate(x, y);
-        
+
         if self.current_ship_attacked.get_length() == 0 && ship.get_length() > 0 {
             // opponent ship found
             self.current_ship_attacked = ship;
