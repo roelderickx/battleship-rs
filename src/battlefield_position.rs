@@ -1,5 +1,7 @@
 use crate::ship::Ship;
 
+use colored_text::Colorize;
+
 #[derive(Copy,Clone)]
 pub struct BattlefieldPosition {
     is_unknown: bool,
@@ -48,22 +50,22 @@ impl BattlefieldPosition {
 
     pub fn print_position(&self) {
         if self.is_unknown {
-            print!(" . ");
+            print!(" {} ", ".".bright_white());
         }
         else if self.is_targeted {
             if self.is_ship() {
-                print!("*{}*", self.ship.get_symbol());
+                print!(" {} ", self.ship.get_symbol().to_string().bright_red());
             }
             else {
-                print!(" * ");
+                print!(" {} ", "*".bright_red());
             }
         }
         else {
             if self.is_ship() {
-                print!("-{}-", self.ship.get_symbol());
+                print!(" {} ", self.ship.get_symbol().bright_green());
             }
             else {
-                print!(" . ");
+                print!(" {} ", "~".bright_blue());
             }
         }
     }

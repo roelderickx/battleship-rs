@@ -3,7 +3,7 @@ use crate::ship::Ship;
 use crate::battlefield::Battlefield;
 
 use std::io;
-use rand::Rng;
+use rand::RngExt;
 
 // FIXME Use traits?
 
