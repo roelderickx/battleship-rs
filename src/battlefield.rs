@@ -22,10 +22,10 @@ impl Battlefield {
     /// Calculates if a given ship can be placed on x,y in the given direction
     /// The ship should not touch any other ship and should be completely inside the grid
     /// x and y must be in the range 0..=9
-    fn can_position_ship(&self, ship: Ship, x: u8, y: u8, direction: Direction) -> bool {
+    pub fn can_position_ship(&self, length: u8, x: u8, y: u8, direction: Direction) -> bool {
         // ship must be inside battlefield
-        if (direction.is_horizontal() && x + ship.get_length() - 1 > 9) ||
-           (direction.is_vertical() && y + ship.get_length() - 1 > 9) {
+        if (direction.is_horizontal() && x + length - 1 > 9) ||
+           (direction.is_vertical() && y + length - 1 > 9) {
             return false;
         }
 
@@ -41,14 +41,14 @@ impl Battlefield {
         }
         let mut x2 = x + 1;
         if direction.is_horizontal() {
-            x2 += ship.get_length() - 1;
+            x2 += length - 1;
         }
         if x2 > 9 {
             x2 = 9;
         }
         let mut y2 = y + 1;
         if direction.is_vertical() {
-            y2 += ship.get_length() - 1;
+            y2 += length - 1;
         }
         if y2 > 9 {
             y2 = 9;
@@ -68,7 +68,7 @@ impl Battlefield {
     /// Positions given ship at x,y in the given direction
     /// Returns true if succeeded, false if the ship cannot be positioned as desired
     pub fn position_ship(&mut self, ship: Ship, x: u8, y: u8, direction: Direction) -> bool {
-        if self.can_position_ship(ship, x, y, direction) {
+        if self.can_position_ship(ship.get_length(), x, y, direction) {
             // Calculate ship zone
             let mut x2 = x + 1;
             if direction.is_horizontal() {
@@ -91,9 +91,17 @@ impl Battlefield {
         }
     }
     
+    pub fn is_targeted(&self, x: u8, y: u8) -> bool {
+        self.grid[x as usize][y as usize].is_targeted()
+    }
+    
+    pub fn get_ship(&self, x: u8, y: u8) -> Ship {
+        self.grid[x as usize][y as usize].get_ship()
+    }
+    
     pub fn reveal_position_information(&mut self, x: u8, y: u8) -> Ship {
         self.grid[x as usize][y as usize].set_targeted();
-        self.grid[x as usize][y as usize].get_ship()
+        self.get_ship(x, y)
     }
     
     pub fn save_position_information(&mut self, x: u8, y: u8, ship: Ship, is_targeted: bool) {

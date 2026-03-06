@@ -32,6 +32,10 @@ impl BattlefieldPosition {
         self.ship
     }
     
+    pub fn is_targeted(&self) -> bool {
+        self.is_targeted
+    }
+    
     pub fn set_targeted(&mut self) {
         self.is_targeted = true;
     }
