@@ -36,12 +36,12 @@ impl Player {
 
     fn print(&self) {
         println!("*** BATTLESHIP ***\n");
-        let spaces = " ".repeat(34-self.name.chars().count());
+        let spaces = " ".repeat(25-self.name.chars().count());
         println!("{}{}| Opponent", self.name, spaces);
 
         for y in 0..11 {
             self.player_field.print_line(y);
-            print!(" | ");
+            print!("  | ");
             self.opponent_field.print_line(y);
             println!("");
         }

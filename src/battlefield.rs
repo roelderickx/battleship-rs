@@ -128,7 +128,7 @@ impl Battlefield {
 
     pub fn print_line(&self, line_number: u8) {
         if line_number == 0 {
-            print!("    1  2  3  4  5  6  7  8  9  10");
+            print!("   1 2 3 4 5 6 7 8 9 10");
         }
         else {
             print!("{:2} ", line_number);

@@ -50,22 +50,22 @@ impl BattlefieldPosition {
 
     pub fn print_position(&self) {
         if self.is_unknown {
-            print!(" {} ", ".".bright_white());
+            print!("{} ", ".".bright_white());
         }
         else if self.is_targeted {
             if self.is_ship() {
-                print!(" {} ", self.ship.get_symbol().to_string().bright_red());
+                print!("{} ", self.ship.get_symbol().to_string().bright_red());
             }
             else {
-                print!(" {} ", "*".bright_red());
+                print!("{} ", "*".bright_red());
             }
         }
         else {
             if self.is_ship() {
-                print!(" {} ", self.ship.get_symbol().bright_green());
+                print!("{} ", self.ship.get_symbol().bright_green());
             }
             else {
-                print!(" {} ", "~".bright_blue());
+                print!("{} ", "~".bright_blue());
             }
         }
     }
