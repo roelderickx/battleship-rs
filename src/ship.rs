@@ -29,7 +29,7 @@ impl Ship {
             Ship::Destroyer => 2
         }
     }
-    
+
     pub fn get_symbol(&self) -> char {
         match self {
             Ship::None => ' ',
@@ -40,7 +40,7 @@ impl Ship {
             Ship::Destroyer => 'D'
         }
     }
-    
+
     pub fn get_name(&self) -> String {
         match self {
             Ship::None => String::from(""),

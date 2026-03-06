@@ -12,13 +12,13 @@ impl Battlefield {
             grid: [[BattlefieldPosition::create_player(); 10]; 10]
         }
     }
-    
+
     pub fn create_opponent() -> Self {
         Self {
             grid: [[BattlefieldPosition::create_opponent(); 10]; 10]
         }
     }
-    
+
     /// Calculates if a given ship can be placed on x,y in the given direction
     /// The ship should not touch any other ship and should be completely inside the grid
     /// x and y must be in the range 0..=9
@@ -64,7 +64,7 @@ impl Battlefield {
 
         true
     }
-    
+
     /// Positions given ship at x,y in the given direction
     /// Returns true if succeeded, false if the ship cannot be positioned as desired
     pub fn position_ship(&mut self, ship: Ship, x: u8, y: u8, direction: Direction) -> bool {
@@ -83,34 +83,34 @@ impl Battlefield {
                     self.save_position_information(x_pos, y_pos, ship, false);
                 }
             }
-            
+
             true
         }
         else {
             false
         }
     }
-    
+
     pub fn is_targeted(&self, x: u8, y: u8) -> bool {
         self.grid[x as usize][y as usize].is_targeted()
     }
-    
+
     pub fn get_ship(&self, x: u8, y: u8) -> Ship {
         self.grid[x as usize][y as usize].get_ship()
     }
-    
+
     pub fn reveal_position_information(&mut self, x: u8, y: u8) -> Ship {
         self.grid[x as usize][y as usize].set_targeted();
         self.get_ship(x, y)
     }
-    
+
     pub fn save_position_information(&mut self, x: u8, y: u8, ship: Ship, is_targeted: bool) {
         self.grid[x as usize][y as usize].save_position_information(ship, is_targeted);
     }
-    
+
     pub fn all_ships_destroyed(&self) -> bool {
         let mut all_ships_length = 0;
-        
+
         for ship in Ship::get_ship_list().into_iter() {
             all_ships_length += ship.get_length();
         }

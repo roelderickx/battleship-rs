@@ -11,7 +11,7 @@ impl Direction {
             Direction::Vertical => false
         }
     }
-    
+
     pub fn is_vertical(&self) -> bool {
         !self.is_horizontal()
     }
