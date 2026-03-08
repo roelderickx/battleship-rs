@@ -172,24 +172,24 @@ impl HumanPlayer {
 
 pub struct ComputerPlayer {
     base_player: Player,
-    first_shot_x: u8,
-    first_shot_y: u8,
+    attack_even_squares: u8,
     current_ship_attacked: Ship,
     current_ship_destroyed: u8,
     first_ship_x: u8,
-    first_ship_y: u8
+    first_ship_y: u8,
+    first_direction: usize
 }
 
 impl ComputerPlayer {
     pub fn create(name: &str) -> Self {
         Self {
             base_player: Player::create(name),
-            first_shot_x: 255,
-            first_shot_y: 255,
+            attack_even_squares: rand::rng().random_range(0..2),
             current_ship_attacked: Ship::None,
             current_ship_destroyed: 0,
             first_ship_x: 255,
-            first_ship_y: 255
+            first_ship_y: 255,
+            first_direction: 0
         }
     }
 
@@ -346,15 +346,7 @@ impl ComputerPlayer {
         let mut x = 255;
         let mut y = 255;
 
-        if self.first_shot_x == 255 && self.first_shot_y == 255 {
-            // The very first shot, pick a random location
-            x = rand::rng().random_range(0..10);
-            y = rand::rng().random_range(0..10);
-
-            self.first_shot_x = x;
-            self.first_shot_y = y;
-        }
-        else if self.current_ship_attacked.get_length() == 0 {
+        if self.current_ship_attacked.get_length() == 0 {
             // The next shot, no ship has been hit before
             // Pick a location which is not targeted before
             // and a multiple of 2 away from the first shot in both directions
@@ -362,7 +354,7 @@ impl ComputerPlayer {
             let mut valid_targets: Vec<(u8, u8)> = Vec::new();
             for y_loop in 0..10 {
                 for x_loop in 0..10 {
-                    if (x_loop + y_loop) % 2 == (self.first_shot_x + self.first_shot_y) % 2 &&
+                    if (x_loop + y_loop) % 2 == self.attack_even_squares &&
                        !self.base_player.opponent_field.is_targeted(x_loop, y_loop) &&
                        self.base_player.opponent_field.can_position_ship(1, x_loop, y_loop,
                                                                          Direction::Horizontal)
@@ -380,21 +372,20 @@ impl ComputerPlayer {
             }
         }
         else {
-            let first_direction = rand::rng().random_range(0..2);
             let attack_direction = [ Direction::Horizontal, Direction::Vertical ];
 
             for _i in 0..2 {
-                if self.is_valid_attack_direction(attack_direction[first_direction]) {
+                if self.is_valid_attack_direction(attack_direction[self.first_direction]) {
                     // A ship had been hit in the previous step
                     // and it may be lying in 1 direction
                     (x, y) = self.get_coord_attack_axis(self.first_ship_x, self.first_ship_y,
-                                                        attack_direction[first_direction]);
+                                                        attack_direction[self.first_direction]);
                 }
-                else if self.is_valid_attack_direction(attack_direction[1 - first_direction]) {
+                else if self.is_valid_attack_direction(attack_direction[1 - self.first_direction]) {
                     // A ship had been hit in the previous step
                     // and it may be lying in the other direction
                     (x, y) = self.get_coord_attack_axis(self.first_ship_x, self.first_ship_y,
-                                                        attack_direction[1 - first_direction]);
+                                                        attack_direction[1 - self.first_direction]);
                 }
             }
         }
@@ -407,6 +398,7 @@ impl ComputerPlayer {
             self.current_ship_destroyed = 1;
             self.first_ship_x = x;
             self.first_ship_y = y;
+            self.first_direction = rand::rng().random_range(0..2);
         }
         else if self.current_ship_attacked == ship {
             self.current_ship_destroyed += 1;
