@@ -65,6 +65,27 @@ impl HumanPlayer {
         return &mut self.base_player;
     }
 
+    fn ask_manual_positioning(&self) -> bool {
+        loop {
+            println!("Ship positioning: (A)utomatically on random spots or (M)anually");
+
+            let mut direction = String::new();
+
+            io::stdin()
+                .read_line(&mut direction)
+                .expect("Failed to read line");
+
+            let first_char = direction.chars().nth(0).unwrap();
+
+            if first_char == 'A' || first_char == 'a' {
+                return false;
+            }
+            else if first_char == 'M' || first_char == 'm' {
+                return true;
+            }
+        }
+    }
+
     /// Asks for a coordinate x,y where both x and y are in range 1..=10
     /// Returns (x, y) as range 0..=9
     fn ask_coordinate(&self, ship: Ship) -> (u8, u8) {
@@ -132,23 +153,53 @@ impl HumanPlayer {
         }
     }
 
-    pub fn position_ships(&mut self) {
+    fn position_ships_automated(&mut self) {
         for ship in Ship::get_ship_list().into_iter() {
             // player position
             loop {
-                let (x, y) = self.ask_coordinate(ship);
-                let direction = self.ask_direction();
-                if self.base_player.position_ship(ship, x, y, direction) {
-                    break;
+                let x = rand::rng().random_range(0..=(10 - ship.get_length()));
+                let y = rand::rng().random_range(0..10);
+                let direction = rand::rng().random_range(1..=2);
+
+                if direction == 1 {
+                    if self.base_player.position_ship(ship, x, y, Direction::Horizontal) {
+                        break;
+                    }
                 }
                 else {
-                    println!("Illegal ship position.");
-                    print!("Ships may not touch each other and must be placed entirely \
-                            inside the battlefield");
+                    if self.base_player.position_ship(ship, y, x, Direction::Vertical) {
+                        break;
+                    }
                 }
             }
+        }
 
-            self.print();
+        self.print();
+    }
+
+    pub fn position_ships(&mut self) {
+        // TODO: ask automated or manual
+        if self.ask_manual_positioning() {
+            for ship in Ship::get_ship_list().into_iter() {
+                // player position
+                loop {
+                    let (x, y) = self.ask_coordinate(ship);
+                    let direction = self.ask_direction();
+                    if self.base_player.position_ship(ship, x, y, direction) {
+                        break;
+                    }
+                    else {
+                        println!("Illegal ship position.");
+                        print!("Ships may not touch each other and must be placed entirely \
+                                inside the battlefield");
+                    }
+                }
+
+                self.print();
+            }
+        }
+        else {
+            self.position_ships_automated();
         }
     }
 
